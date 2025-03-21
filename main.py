@@ -18,19 +18,14 @@ def is_valid_model_file(filepath):
 # Initialize lists to store loss values
 loss_values = []
 
-# Check if a trained model exists and is valid
 if os.path.exists(MODEL_FILE) and is_valid_model_file(MODEL_FILE):
     print("Loading existing model...")
     model = load_model(MODEL_FILE)
 else:
     print("Training a new model...")
     # Generate dataset
-    x = np.random.randint(0, 100, size=(100, 1))  # Random numbers between 0 and 100
-    y = x ** 2  # Labels are the square of the numbers
-
-    # Normalize data
-    x = x / 100.0
-    y = y / 10000.0
+    x = np.random.randint(0, 100, size=(100, 1))
+    y = x * 2
 
     # Build the model
     model = Sequential([
@@ -44,8 +39,6 @@ else:
 
     # Train the model
     history = model.fit(x, y, epochs=50, batch_size=32, verbose=1)
-
-    # Store initial training loss
     loss_values.extend(history.history['loss'])
 
     # Save the trained model
@@ -53,26 +46,20 @@ else:
     print(f"Model saved to {MODEL_FILE}")
 
 # Set up live graph
-plt.ion()  # Turn on interactive mode
+plt.ion()
 fig, ax = plt.subplots()
 ax.set_xlabel("Epoch")
 ax.set_ylabel("Loss")
 line, = ax.plot([], [], label="Training Loss")
 ax.legend()
 
-# Continuous training and prediction loop
 print("Starting automatic training and predictions...")
 while True:
     # Generate new training data
-    x = np.random.randint(0, 100, size=(1000, 1))  # Random numbers between 0 and 100
-    y = x ** 2  # Labels are the square of the numbers
-
-    # Normalize data
-    x = x / 100.0
-    y = y / 10000.0
-
+    x = np.random.randint(0, 100, size=(1000, 1))
+    y = x * 2
     # Train the model on new data
-    history = model.fit(x, y, epochs=10, batch_size=32, verbose=1)  # Train for 10 epochs at a time
+    history = model.fit(x, y, epochs=10, batch_size=32, verbose=1)
 
     # Update loss values
     loss_values.extend(history.history['loss'])
@@ -80,8 +67,8 @@ while True:
     # Update the live plot
     line.set_xdata(range(1, len(loss_values) + 1))
     line.set_ydata(loss_values)
-    ax.relim()  # Recalculate limits
-    ax.autoscale_view()  # Autoscale the view
+    ax.relim()
+    ax.autoscale_view()
     plt.draw()
 
     # Save the graph to a PNG file
@@ -89,12 +76,11 @@ while True:
     print("Graph saved as 'training_progress.png'")
 
     # Perform predictions
-    for _ in range(200):  # Adjust the range for the number of predictions you want
-        num = np.random.randint(0, 100)  # Generate a random number between 0 and 100
-        normalized_num = num / 100.0  # Normalize the input
-        prediction = model.predict(np.array([[normalized_num]]))  # Predict
-        denormalized_prediction = prediction[0][0] * 10000  # Denormalize the output
-        print(f"Input: {num}, Predicted Output: {denormalized_prediction:.2f}")
+    for _ in range(200):
+        num = np.random.randint(0, 100)
+        prediction = model.predict(np.array([[num]]))
+        rounded_prediction = int(round(prediction[0][0]))
+        print(f"Input: {num}, Predicted Output: {rounded_prediction}")
 
     # Check if the user wants to exit
     user_input = input("Type 'exit' to stop or press Enter to continue: ")
